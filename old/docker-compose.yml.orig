@@ -1,0 +1,64 @@
+version: '2'
+services:
+  mongodb:
+    image: 'bitnami/mongodb:latest'
+    environment:
+      - DOCKER_CONTENT_TRUST=1
+    volumes:
+      - 'mongodb_data:/bitnami'
+#      - '/home/fabi/Downloads/parse/data/mongodb-persistence:/bitnami'
+  parse:
+    image: 'bitnami/parse:latest'
+    ports:
+      - '1337:1337'
+    environment:
+      - DOCKER_CONTENT_TRUST=1
+      - PARSE_HOST=parse.dev.pag.com
+      - PARSE_APP_ID=scandid
+#      - PARSE_MASTER_KEY=mymasterkey
+#      - PARSE_PORT_NUMBER=1337
+    volumes:
+      - 'parse_dashboard_data:/bitnami'
+#      - '/home/fabi/Downloads/parse/data/parse-persistence:/bitnami'
+    depends_on:
+      - mongodb
+  parse-dashboard:
+    image: 'bitnami/parse-dashboard:latest'
+    ports:
+#      - '8080:4040'
+#      - '4040:4040'
+      - '80:4040'
+    environment:
+      - DOCKER_CONTENT_TRUST=1
+      - PARSE_DASHBOARD_PASSWORD=password
+      - PARSE_DASHBOARD_USER=pag
+      - PARSE_DASHBOARD_APP_NAME=scandid
+#      - PARSE_DASHBOARD_ALLOW_INSECURE_HTTP=true
+#      - PARSE_DASHBOARD_CONFIG='{"apps":[{"appId":"scandid","serverURL":"http://localhost:1337/parse","masterKey":"mymasterkey","appName":"scandid"}],"users":[{"user":"fabi","pass":"password"}]}'
+    volumes:
+      - 'parse_dashboard_data:/bitnami'
+#      - '/home/fabi/Downloads/parse/data/parse_dashboard-persistence:/bitnami'
+    depends_on:
+      - mongodb
+      - parse 
+#      - pag-mobileappdev-parse-server
+#  nginx-ssl-proxy:
+#    image: danieldent/nginx-ssl-proxy
+#    restart: always
+#    environment:
+#      UPSTREAM: 127.0.0.1:80
+#      SERVERNAME: 172.23.0.5:4040
+#      EXTRANAMES: www.parse.pag.dev,parse2.pag.dev
+#    ports:
+#    - "80:80"
+#    - "443:443"
+#    - "8080:8080"
+#    volumes:
+#    - "/etc/letsencrypt"
+volumes:
+  mongodb_data:
+    driver: local
+  parse_data:
+    driver: local
+  parse_dashboard_data:
+    driver: local

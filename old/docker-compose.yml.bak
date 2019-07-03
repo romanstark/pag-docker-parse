@@ -1,0 +1,32 @@
+version: '2'
+services:
+  pag-mobileappdev-mongodb:
+    image: 'bitnami/mongodb:latest'
+    volumes:
+      - '/home/fabi/Downloads/parse/data/mongodb_data:/bitnami'
+  pag-mobileappdev-parse-server:
+    image: 'bitnami/parse:latest'
+    ports:
+      - '1337:1337'
+    environment:
+      - PARSE_HOST=pag-mobileappdev-parse-server
+      - PARSE_APP_ID=scandid
+      - PARSE_MASTER_KEY=mymasterkey
+      - PARSE_PORT_NUMBER=1337
+    volumes:
+      - '/home/fabi/Downloads/parse/data/parse_data:/bitnami'
+    depends_on:
+      - pag-mobileappdev-mongodb
+  pag-mobileappdev-parse-dashboard:
+    image: 'bitnami/parse-dashboard:latest'
+    ports:
+      - '8080:4040'
+    environment:
+      - PARSE_DASHBOARD_PASSWORD=password
+      - PARSE_DASHBOARD_USER=pag
+      - PARSE_DASHBOARD_APP_NAME=scandid
+    volumes:
+      - '/home/fabi/Downloads/parse/data/parse_dashboard_data:/bitnami'
+    depends_on:
+      - pag-mobileappdev-mongodb
+      - pag-mobileappdev-parse-server

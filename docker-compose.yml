@@ -1,0 +1,69 @@
+# docker-compose.yml
+version: '2'
+services:
+  nginx:
+    image: valian/docker-nginx-auto-ssl
+    restart: on-failure
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ssl_data:/etc/resty-auto-ssl
+    environment:
+      ALLOWED_DOMAINS: 'dev.pag.com'
+      SITES: 'dev.pag.com=parse-dashboard:4040'
+  mongodb:
+    image: 'bitnami/mongodb:latest'
+    environment:
+      - DOCKER_CONTENT_TRUST=1
+    volumes:
+      - 'mongodb_data:/bitnami'
+  parse:
+    image: 'bitnami/parse:latest'
+#    ports:
+#      - '1337:1337'
+    environment:
+      - DOCKER_CONTENT_TRUST=1
+      - PARSE_APP_ID=scandid
+    volumes:
+      - 'parse_dashboard_data:/bitnami'
+    depends_on:
+      - mongodb
+  parse-dashboard:
+    image: 'bitnami/parse-dashboard:latest'
+#    ports:
+#      - '4040:4040'
+    environment:
+      - DOCKER_CONTENT_TRUST=1
+      - PARSE_DASHBOARD_PASSWORD=password
+      - PARSE_DASHBOARD_USER=pag
+      - PARSE_DASHBOARD_APP_NAME=scandid
+    volumes:
+      - 'parse_dashboard_data:/bitnami'
+    depends_on:
+      - mongodb
+      - parse
+      - nginx
+  jenkins:
+    image: 'bitnami/jenkins:latest'
+    restart: on-failure
+    ports:
+      - '8080:8080'
+#    environment:
+#      - JENKINS_PASSWORD=password
+#      - JENKINS_USERNAME=pag
+#      - JENKINS_HOME=/opt/jenkins/jenkins/jenkins_home
+#      - DISABLE_JENKINS_INITIALIZATION=yes
+    volumes:
+      - 'jenkins_data:/bitnami'
+volumes:
+  mongodb_data:
+    driver: local
+  parse_data:
+    driver: local
+  parse_dashboard_data:
+    driver: local
+  ssl_data:
+    driver: local
+  jenkins_data:
+    driver: local
